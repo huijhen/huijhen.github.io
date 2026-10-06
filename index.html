@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hui Jhen — Portfolio</title>
+<meta name="description" content="Portfolio of Hui Jhen, a graphic and layout designer. Open to full-time roles, remote OK.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Mrs+Saint+Delafield&family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fcfaf6;--ink:#2b2b33;--mute:#6b6b73}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Mono","Noto Sans TC",ui-monospace,monospace;overflow-x:hidden}
+
+/* 中間的文字區（pointer-events:none，不會擋住拖曳） */
+#home{position:relative;height:100vh;height:100svh;overflow:hidden}
+#hero{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;pointer-events:none;z-index:1}
+h1{margin:0;font:400 clamp(64px,10vw,130px)/1 "Mrs Saint Delafield",cursive}
+.role{margin:24px 0 4px;font-size:clamp(16px,1.6vw,22px);letter-spacing:.04em}
+.sub{margin:0 0 20px;font-size:13px;font-style:italic;color:var(--mute)}
+.desc{margin:0;max-width:640px;font-size:clamp(13px,1.3vw,18px);line-height:1.5}
+
+/* 拼貼物件：外層負責位置與拖曳，內層 img 負責 hover 動畫 */
+#stage{position:absolute;inset:0;z-index:2;pointer-events:none}
+.obj{position:absolute;pointer-events:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+  opacity:0;transition:opacity .6s;
+  transform:translate(var(--dx,0px),var(--dy,0px)) rotate(var(--r,0deg))}
+.obj.in{opacity:1}
+.obj.drag{cursor:grabbing}
+.obj img{display:block;width:100%;height:auto;pointer-events:none;-webkit-user-drag:none;
+  transform-origin:var(--origin,50% 50%);transition:transform .25s,filter .25s;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.15))}
+.obj.drag img{transform:scale(1.05);filter:drop-shadow(0 14px 18px rgba(0,0,0,.25))}
+
+/* hover（手機是點一下 → .play）時各物件的動畫 */
+.obj:is(:hover,.play):not(.drag) img{animation:var(--anim,none)}
+.obj[data-anim=grow]:is(:hover,.play):not(.drag) img{transform:scale(1.08)}
+@keyframes wiggle{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes swing{20%{transform:rotate(10deg)}40%{transform:rotate(-7deg)}60%{transform:rotate(4deg)}80%{transform:rotate(-2deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bounce{40%{transform:translateY(-14px)}70%{transform:translateY(0)}85%{transform:translateY(-5px)}}
+#snd{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;font:12px "IBM Plex Mono",monospace;color:var(--mute);background:rgba(252,250,246,.85);border:1px solid rgba(43,43,51,.2);border-radius:999px;padding:7px 14px;cursor:pointer}
+#snd:hover{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.obj img{animation:none!important}}
+
+/* 物件上的小標籤（可點擊的物件才有） */
+.tag{position:absolute;left:50%;top:0;opacity:0;transform:translate(-50%,-70%) rotate(calc(var(--r,0deg) * -1));white-space:nowrap;font:12px "IBM Plex Mono",monospace;background:var(--ink);color:#fff;padding:4px 11px;border-radius:999px;pointer-events:none;transition:opacity .2s,transform .25s}
+.obj.link:is(:hover,.play) .tag{opacity:1;transform:translate(-50%,-125%) rotate(calc(var(--r,0deg) * -1))}
+@media (hover:none){.tag{opacity:1;transform:translate(-50%,-110%) rotate(calc(var(--r,0deg) * -1))}}
+
+/* 自我介紹區 */
+body .sec{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:96px 24px;border-top:1px solid rgba(43,43,51,.08)}
+#projects{background:#f3eee4}
+.wrap{max-width:860px;width:100%}
+.eyebrow{margin:0 0 16px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.sec h2{margin:0 0 28px;font:400 clamp(52px,8vw,96px)/1.05 "Mrs Saint Delafield",cursive}
+.bio{margin:0 0 44px;max-width:640px;font-size:clamp(15px,1.5vw,19px);line-height:1.7}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px;margin:0;padding-top:24px;border-top:1px solid rgba(43,43,51,.2)}
+.facts dt{margin-bottom:6px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute)}
+.facts dd{margin:0;font-size:15px}
+.links{display:flex;flex-wrap:wrap;gap:24px;margin-top:48px;font-size:14px}
+.links a{color:var(--ink);text-underline-offset:4px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.card{display:block;color:var(--ink);text-decoration:none;transition:transform .3s}
+.card:hover{transform:translateY(-6px)}
+.thumb{aspect-ratio:4/3;border-radius:14px;margin-bottom:14px}
+.card h3,.proj h3{margin:0 0 6px;font-size:16px;font-weight:500}
+.card p,.proj p,.proj small{margin:0;font-size:13px;line-height:1.6;color:var(--mute)}
+.proj{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;padding:28px 0;border-top:1px solid rgba(43,43,51,.2)}
+.proj:last-of-type{border-bottom:1px solid rgba(43,43,51,.2)}
+.proj .num{font-size:13px;color:var(--mute)}
+.proj a{color:var(--ink);font-size:14px;text-underline-offset:4px;white-space:nowrap}
+@media (max-width:640px){.proj{grid-template-columns:1fr;gap:10px}}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .8s,transform .8s}
+.reveal.show{opacity:1;transform:none}
+
+/* 作品區：瀑布流 + 燈箱 */
+#works .wrap{max-width:1100px}
+.masonry{columns:3 260px;column-gap:24px}
+button.card{display:block;width:100%;margin:0 0 32px;padding:0;border:0;background:none;text-align:left;font:inherit;cursor:pointer;break-inside:avoid}
+.card .th{display:block;width:100%;height:auto;border-radius:12px;margin-bottom:12px;background:#e9e4da}
+.card .zt{display:block;font:700 16px/1.4 "Noto Serif TC",serif}
+.card .et{display:block;margin-top:2px;font-size:12px;color:var(--ink)}
+.card .ct{display:block;margin-top:4px;font:400 12px "IBM Plex Mono","Noto Sans TC",monospace;color:var(--mute)}
+.card.reveal.show{transition:opacity .8s,transform .3s}
+.card.reveal.show:hover{transform:translateY(-6px)}
+body:has(dialog[open]){overflow:hidden}
+dialog#lb{border:0;padding:0;width:min(1100px,94vw);max-height:92vh;border-radius:16px;background:var(--bg);color:var(--ink);overflow:auto}
+dialog#lb::backdrop{background:rgba(20,16,12,.72)}
+.lb{display:grid;grid-template-columns:1.2fr 1fr}
+.lb-img{display:flex;align-items:center;justify-content:center;background:#e9e4da}
+.lb-img img{display:block;max-width:100%;max-height:92vh;object-fit:contain}
+.lb-txt{display:flex;flex-direction:column;gap:14px;padding:40px 32px 28px}
+.lb-txt h3.zh{margin:0;font:700 24px/1.3 "Noto Serif TC",serif}
+.lb-txt .cat{font-size:12px;letter-spacing:.08em;color:var(--mute)}
+.lb-txt p.zh{margin:0;font:400 15px/1.9 "Noto Sans TC",sans-serif}
+.lb-txt hr{width:100%;margin:6px 0;border:0;border-top:1px solid rgba(43,43,51,.2)}
+.lb-txt h4.en{margin:0;font:500 15px/1.4 "IBM Plex Mono",monospace}
+.lb-txt p.en{margin:0;font:400 13px/1.8 "IBM Plex Mono",monospace;color:var(--mute)}
+.lb-nav{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:16px;font-size:12px;color:var(--mute)}
+.lb-nav button{font:12px "IBM Plex Mono",monospace;color:var(--ink);background:none;border:1px solid rgba(43,43,51,.25);border-radius:999px;padding:6px 14px;cursor:pointer}
+.lb-nav button:hover{background:var(--ink);color:#fff}
+.lb-close{position:absolute;top:10px;right:12px;z-index:2;width:34px;height:34px;border:0;border-radius:50%;background:rgba(252,250,246,.9);color:var(--ink);font-size:14px;cursor:pointer}
+@media (max-width:720px){.lb{grid-template-columns:1fr}.lb-img img{max-height:50vh}.lb-txt{padding:24px 20px}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}}
+
+/* 燈箱：固定大小 + 可縮放 */
+dialog#lb{height:min(720px,90vh);max-height:none;overflow:hidden}
+.lb{height:100%;grid-template-rows:minmax(0,1fr)}
+.lb-img{position:relative;min-height:0;overflow:hidden}
+.lb-txt{overflow:auto;min-height:0}
+.zbox{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;cursor:zoom-in}
+.zbox.zoomed{cursor:grab}
+.zbox img{max-width:100%;max-height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none;transform-origin:center}
+.zbtns{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;z-index:2}
+.zbtns button{width:34px;height:34px;border:0;border-radius:50%;background:rgba(252,250,246,.92);color:var(--ink);font:15px "IBM Plex Mono",monospace;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+@media (max-width:720px){.lb{grid-template-rows:minmax(0,46fr) minmax(0,54fr)}}
+dialog#zv{border:0;padding:0;width:min(1200px,96vw);height:92vh;border-radius:16px;background:#1d1a17;overflow:hidden}
+dialog#zv::backdrop{background:rgba(20,16,12,.82)}
+#zv .zwrap{position:absolute;inset:0}
+
+/* 自我介紹 */
+.about-grid{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:56px;align-items:start}
+.polaroid{position:relative;background:#fff;padding:14px 14px 58px;box-shadow:0 10px 30px rgba(0,0,0,.12);transform:rotate(-3deg)}
+.polaroid::after{content:"Hui Jhen";position:absolute;left:0;right:0;bottom:12px;text-align:center;font:30px "Mrs Saint Delafield",cursive}
+.polaroid .ph{aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;text-align:center;background:#efe9de;border:1px dashed rgba(43,43,51,.3);color:var(--mute);font-size:12px;line-height:1.8}
+.polaroid img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover}
+.tagline{margin:0 0 6px;font:700 clamp(18px,2vw,24px)/1.5 "Noto Serif TC",serif}
+.tagline-en{margin:0 0 24px;font-size:13px;color:var(--mute)}
+.bio{margin-bottom:14px}
+.bio.zh{font-family:"Noto Sans TC",sans-serif;line-height:1.9}
+.bio.en{font-size:13px;line-height:1.8;color:var(--mute);margin-bottom:36px}
+.facts dd small{display:block;margin-top:2px;font-size:12px;color:var(--mute)}
+.facts{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.links{margin-top:32px}
+@media (max-width:760px){.about-grid{grid-template-columns:1fr;gap:40px}.polaroid{max-width:260px;margin:0 auto}}
+
+/* 專題 */
+#projects .wrap{max-width:1100px}
+.p-title{margin:0 0 6px;font:700 clamp(22px,3vw,34px)/1.3 "Noto Serif TC",serif}
+.p-sub{margin:0 0 28px;font-size:13px;color:var(--mute)}
+.p-hero{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in;border-radius:14px;overflow:hidden;margin:12px 0 44px}
+.p-hero img,.shot img{display:block;width:100%;height:auto}
+.p-two{display:grid;grid-template-columns:1.3fr 1fr;gap:48px;margin-bottom:56px}
+.p-h{margin:0 0 14px;font:500 12px "IBM Plex Mono","Noto Sans TC",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.p-two p.zh{margin:0 0 14px;font:400 15px/1.9 "Noto Sans TC",sans-serif}
+.p-two p.en{margin:0;font-size:13px;line-height:1.8;color:var(--mute)}
+.roles{margin:0;padding:0;list-style:none}
+.roles li{padding:14px 0;border-top:1px solid rgba(43,43,51,.2);font:500 15px/1.5 "Noto Sans TC",sans-serif}
+.roles li small{display:block;margin-top:2px;font:400 12px "IBM Plex Mono",monospace;color:var(--mute)}
+.shots{columns:2 300px;column-gap:20px;margin:0 0 56px}
+.shot{display:block;width:100%;margin:0 0 22px;padding:0;border:0;background:none;text-align:left;cursor:zoom-in;break-inside:avoid;font:inherit;color:var(--ink)}
+.shot img{border-radius:12px;margin-bottom:8px}
+.shot span{display:block;font-size:12px;color:var(--mute)}
+.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 56px}
+.ig button{padding:0;border:0;background:none;cursor:zoom-in;aspect-ratio:1}
+.ig img{display:block;width:100%;height:100%;object-fit:cover;border-radius:6px}
+.cmps{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.cmp{position:relative;aspect-ratio:3/2;border-radius:12px;overflow:hidden;user-select:none;--p:50%}
+.cmp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.cmp .bf{clip-path:inset(0 calc(100% - var(--p)) 0 0)}
+.cmp .hd{position:absolute;top:0;bottom:0;left:var(--p);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.35);pointer-events:none}
+.cmp .hd::after{content:"⇄";position:absolute;top:50%;left:50%;width:34px;height:34px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;border-radius:50%;background:#fff;color:#2b2b33;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+.cmp .tg{position:absolute;top:10px;padding:3px 9px;border-radius:999px;background:rgba(43,43,51,.75);color:#fff;font:11px "IBM Plex Mono","Noto Sans TC",monospace;pointer-events:none}
+.cmp input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
+.cmp-note{margin:12px 0 0;font-size:12px;line-height:1.7;color:var(--mute)}
+.cmp-note b{display:block;margin-bottom:2px;font:500 14px "Noto Sans TC",sans-serif;color:var(--ink)}
+@media (max-width:760px){.p-two,.cmps{grid-template-columns:1fr}}
+
+/* 導覽列 */
+#nav{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:40;display:flex;gap:2px;padding:4px;border-radius:999px;background:rgba(252,250,246,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(43,43,51,.12);font:12px "IBM Plex Mono",monospace;white-space:nowrap}
+#nav a{padding:6px 12px;border-radius:999px;color:var(--ink);text-decoration:none}
+#nav a:hover{background:var(--ink);color:#fff}
+#nav a[hidden],.sec[hidden]{display:none}
+/* 作品區：由左到右的瀑布流、標籤 */
+.masonry{columns:auto;display:flex;gap:24px;align-items:flex-start}
+.mcol{flex:1;min-width:0}
+.card .kd{display:inline-block;margin-top:6px;padding:2px 9px;border:1px solid rgba(43,43,51,.25);border-radius:999px;font:11px "IBM Plex Mono","Noto Sans TC",monospace;color:var(--mute)}
+.card .kd.client{background:var(--ink);border-color:var(--ink);color:#fff}
+.note{margin:8px 0 0;font-size:12px;line-height:1.7;color:var(--mute)}
+/* 專題：IG 窄版 + 說明；檢視器切換 */
+.ig-wrap{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:40px;align-items:center;margin-bottom:56px}
+.ig-wrap .ig{margin:0}
+.ig-t .zh{margin:0 0 12px;font:400 15px/1.9 "Noto Sans TC",sans-serif}
+.ig-t .en{margin:0 0 14px;font-size:13px;line-height:1.8;color:var(--mute)}
+.ig-t .hint{margin:0;font-size:12px;color:var(--mute)}
+.play-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.znav{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:12px;color:#fff;font:12px "IBM Plex Mono",monospace}
+.znav[hidden]{display:none}
+.znav button{padding:6px 14px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:rgba(29,26,23,.6);color:#fff;font:12px "IBM Plex Mono",monospace;cursor:pointer}
+.znav button:hover{background:#fff;color:#1d1a17}
+@media (max-width:760px){.ig-wrap{grid-template-columns:1fr;gap:20px}}
+/* 自我介紹：求職狀態、Email 按鈕 */
+.status{margin:0 0 20px;font:500 14px/1.5 "Noto Sans TC","IBM Plex Mono",sans-serif}
+.status small{display:block;margin-top:2px;font:400 12px/1.7 "Noto Sans TC","IBM Plex Mono",sans-serif;color:var(--mute)}
+.status .dot{display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:#4caf6a;box-shadow:0 0 0 4px rgba(76,175,106,.2)}
+.links .btn{padding:10px 20px;border-radius:999px;background:var(--ink);color:#fff;text-decoration:none}
+.links .btn:hover{background:#6f8f5e}
+/* 手機：縮小物件、觸控時不拖曳（讓手指可以捲動頁面） */
+@media (max-width:760px){:root{--k:.85;--minw:48px}#nav{font-size:11px}#nav a{padding:6px 9px}}
+@media (pointer:coarse){.obj{touch-action:pan-y;cursor:pointer}}
+
+/* 進場畫面 */
+body.lock{overflow:hidden}
+#enter{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:var(--bg);transition:opacity .6s}
+#enter.gone{opacity:0;pointer-events:none}
+.en-name{margin:0 0 36px;font:400 clamp(96px,18vw,200px)/1 "Mrs Saint Delafield",cursive}
+.en-btns{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+.en-btns button{padding:11px 24px;border:1px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font:13px "IBM Plex Mono",monospace;cursor:pointer}
+.en-btns button:first-child{background:var(--ink);color:#fff}
+.en-btns button:hover{background:#6f8f5e;border-color:#6f8f5e;color:#fff}
+.en-note{margin:18px 0 0;font-size:12px;color:var(--mute)}
+/* Sound 按鈕只在首頁；專題標題；頁尾 */
+#snd{transition:opacity .3s}
+#snd.off{opacity:0;pointer-events:none}
+.zhh{font:700 clamp(38px,6vw,68px)/1.2 "Noto Serif TC",serif!important}
+.zhh span{display:block;margin-top:4px;font:400 clamp(44px,7vw,84px)/1.1 "Mrs Saint Delafield",cursive;color:var(--mute)}
+.p-title small{display:block;margin-top:4px;font:400 13px "IBM Plex Mono",monospace;color:var(--mute)}
+.foot{padding:28px 24px calc(28px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;color:var(--mute);background:var(--bg);border-top:1px solid rgba(43,43,51,.08)}
+.zarr{position:absolute;top:50%;z-index:3;width:44px;height:44px;transform:translateY(-50%);border:0;border-radius:50%;background:rgba(252,250,246,.92);color:#2b2b33;font:28px/1 sans-serif;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+.zarr.prev{left:14px}.zarr.next{right:14px}.zarr[hidden]{display:none}
+.zarr:hover{background:#fff}
+/* 音符按鈕（右下）與可麗露回首頁按鈕（左下） */
+button#snd{left:auto;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:none;width:46px;height:46px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid rgba(43,43,51,.18);border-radius:50%;background:rgba(252,250,246,.92);color:var(--mute);opacity:1;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:color .2s,background .2s}
+button#snd.on{color:var(--ink)}
+button#snd:hover{background:#fff;color:var(--ink)}
+#snd.on .slash{display:none}
+#snd.nudge::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--ink);opacity:0;animation:ring 2s ease-out infinite;pointer-events:none}
+@keyframes ring{0%{transform:scale(.8);opacity:.5}100%{transform:scale(1.35);opacity:0}}
+@media (max-width:760px){button#snd{width:32px;height:32px}#lang{height:32px}#lang button{padding:0 9px}}
+@media (prefers-reduced-motion:reduce){#snd.nudge::after{animation:none}}
+
+/* 語言切換：同一時間只顯示一種語言 */
+html[data-lang="zh"] body [lang="en"]{display:none!important}
+html[data-lang="en"] body [lang="zh"]{display:none!important}
+body [lang="en"]{font-family:"IBM Plex Mono","Noto Sans TC",monospace}
+.zt [lang="en"],.lb-txt h3 [lang="en"]{font-family:"Noto Serif TC",serif}
+#lang{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:calc(14px + env(safe-area-inset-left,0px));z-index:40;display:flex;height:34px;overflow:hidden;border:1px solid rgba(43,43,51,.18);border-radius:999px;background:rgba(252,250,246,.92);font:12px "IBM Plex Mono","Noto Sans TC",monospace}
+#lang button{padding:0 11px;border:0;background:none;color:var(--mute);font:inherit;cursor:pointer}
+#lang button.on{background:var(--ink);color:#fff}
+button#snd{top:calc(14px + env(safe-area-inset-top,0px));bottom:auto;right:calc(14px + env(safe-area-inset-right,0px));width:34px;height:34px}
+#snd svg{width:17px;height:17px}
+.hero-line{margin:20px 0 0;font:400 clamp(14px,1.6vw,19px)/1.7 "Noto Serif TC",serif;letter-spacing:.04em;color:var(--mute)}
+.contact{margin-top:72px;padding-top:44px;border-top:1px solid rgba(43,43,51,.2);text-align:center}
+.c-t{margin:0 0 22px;font:700 clamp(18px,2.2vw,26px)/1.5 "Noto Serif TC",serif}
+.c-t [lang="en"]{font-weight:500}
+.c-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.c-btns .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 28px;border:1px solid var(--ink);border-radius:999px;background:var(--ink);color:#fff;font:14px "IBM Plex Mono","Noto Sans TC",monospace;text-decoration:none;cursor:pointer}
+.c-btns .btn.ghost{background:transparent;color:var(--ink)}
+.c-btns .btn:hover{background:#6f8f5e;border-color:#6f8f5e;color:#fff}
+.c-btns .ok{display:none}.c-btns .copied .lbl{display:none}.c-btns .copied .ok{display:inline}
+.status{font-family:"Noto Sans TC","IBM Plex Mono",sans-serif}
+/* 左上語言鈕與右上音符鈕再縮小；首頁小標；自我介紹照片 */
+#lang{top:calc(18px + env(safe-area-inset-top,0px));height:26px;font-size:11px}
+#lang button{padding:0 8px}
+button#snd{top:calc(16px + env(safe-area-inset-top,0px));width:30px;height:30px}
+#snd svg{width:15px;height:15px}
+@media (max-width:760px){#lang{height:24px;top:calc(19px + env(safe-area-inset-top,0px))}#lang button{padding:0 7px}button#snd{width:28px;height:28px;top:calc(17px + env(safe-area-inset-top,0px))}}
+.hero-kicker{margin:16px 0 0;padding-left:.32em;font:400 12px/1.6 "IBM Plex Mono","Noto Sans TC",monospace;letter-spacing:.32em;text-transform:uppercase;color:var(--mute)}
+.hero-line{margin-top:14px}
+.polaroid img{aspect-ratio:1/1}
+/* 語言鈕／音符鈕：滑過去有按鈕的回饋；拍立得下方不加簽名；首頁英文 */
+#lang{box-shadow:0 1px 4px rgba(0,0,0,.1);transition:box-shadow .2s}
+#lang:hover{box-shadow:0 3px 10px rgba(0,0,0,.2)}
+#lang button{cursor:pointer;transition:background .2s,color .2s,transform .15s}
+#lang button:hover:not(.on){background:rgba(43,43,51,.12);color:var(--ink)}
+#lang button.on:hover{background:var(--ink);color:#fff}
+#lang button:active{transform:scale(.92)}
+button#snd{cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s,color .2s}
+button#snd:hover{background:var(--ink);color:#fff;transform:translateY(-1px) scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,.28)}
+button#snd:active{transform:scale(.92)}
+#lang button:focus-visible,button#snd:focus-visible{outline:2px solid #6f8f5e;outline-offset:2px}
+.polaroid::after{content:none}
+.hero-line{font-family:"IBM Plex Mono","Noto Sans TC",monospace;font-size:clamp(13px,1.45vw,17px)}
+/* 自我介紹區：文字與全站對齊（主標 Hui Jhen 不動） */
+#about .bio{font-size:15px;line-height:1.9}
+#about .bio [lang="en"]{font-size:14px;line-height:1.8}
+#about .tagline{font-size:clamp(17px,1.8vw,21px)}
+#about .facts dd{font-size:14px}
+#about .c-t{font-size:clamp(17px,1.9vw,22px)}
+</style>
+<script>document.documentElement.dataset.lang=(function(){try{var v=localStorage.getItem("lang");if(v==="zh"||v==="en")return v}catch(e){}return /^zh/i.test(navigator.language||"")?"zh":"en"})()</script>
+</head>
+<body>
+<div id="lang" role="group" aria-label="Language"><button type="button" data-l="zh">中</button><button type="button" data-l="en">EN</button></div>
+<nav id="nav"><a href="#home">Home</a><a href="#works">Works</a><a href="#projects">Projects</a><a href="#play" id="nav-play">Play</a><a href="#about">About</a></nav>
+<div id="home">
+<section id="hero">
+  <h1>Hui Jhen</h1>
+  <p class="hero-kicker">Graphic &amp; Layout Design</p>
+  <p class="hero-line">Making dense information clear, orderly and warm.</p>
+</section>
+<div id="stage"></div>
+</div>
+
+<section id="works" class="sec">
+  <div class="wrap">
+    <p class="eyebrow reveal"><span lang="zh">精選作品</span><span lang="en">Selected works</span></p>
+    <h2 class="reveal">Works</h2>
+    <div id="grid" class="masonry"></div>
+    <p class="note reveal"><span lang="zh">evian 與波爾茶為既有品牌，品牌名稱屬各自擁有者，相關作品為課程作業，與品牌方無關。</span><span lang="en">Brand names belong to their respective owners; these student works are not affiliated with the brands.</span></p>
+  </div>
+</section>
+
+<section id="projects" class="sec">
+  <div class="wrap">
+    <p class="eyebrow reveal"><span lang="zh">專題</span><span lang="en">Case study</span></p>
+    <h2 class="reveal zhh">知性囝囝仔<span>Brainy Nannan</span></h2>
+    <h3 class="p-title reveal"><span lang="zh">預防性犯罪聯絡簿</span><span lang="en">A sexual-crime prevention contact book</span></h3>
+    <p class="p-sub reveal"><span lang="zh">團隊專題・6 人・Illustrator, Photoshop, InDesign</span><span lang="en">Team project · 6 members · Illustrator, Photoshop, InDesign</span></p>
+    <!-- 團隊成員：想公開時，填入名字並刪掉下一行的 hidden -->
+    <p class="p-sub" id="team" hidden>Team: Name · Name · Name · Name · Name · Name</p>
+    <button class="p-hero zi reveal" type="button" data-full="img/p0.jpg"><img src="img/p0.jpg" width="1800" height="1273" alt="Brainy Nannan overview"></button>
+    <div class="p-two reveal">
+      <div>
+        <h4 class="p-h"><span lang="zh">設計理念</span><span lang="en">Concept</span></h4>
+        <p class="zh" lang="zh">以「預防性犯罪」為核心，將性教育內容融入國小聯絡簿中，創造趣味與互動性的創新聯絡簿。設計針對低、中、高年級進行年齡分級，結合漫畫故事、角色遊戲卡及折紙等多元媒材，讓孩子在日常書寫與遊戲中，自然學習自我保護的知識。聯絡簿同時融入數位功能，透過掃碼觀看教學影片或下載教材，增強學習的靈活性與便利性。設計強調親師共育，提供觀察與反饋區域，讓家長與老師共同參與孩子的成長，提升孩子的保護意識，以及推動兒童性犯罪防治教育的普及。</p>
+        <p class="en" lang="en">Centered on preventing sexual crimes, this project weaves sex education into the elementary-school contact book, creating an interactive and playful alternative. Designed in graded versions for lower, middle and upper grades, it combines comic stories, character game cards and origami, so children learn self-protection naturally through everyday writing and play. Digital features such as QR codes open teaching videos and downloadable materials. Emphasizing home–school cooperation, it provides observation and feedback sections so parents and teachers can take part in a child's growth, raising awareness of self-protection and promoting wider child sexual-crime prevention education.</p>
+      </div>
+      <div>
+        <h4 class="p-h"><span lang="zh">負責項目</span><span lang="en">My role</span></h4>
+        <ul class="roles">
+          <li><span lang="zh">單元企劃發想</span><span lang="en">Unit planning &amp; concept development</span></li>
+          <li><span lang="zh">紙本聯絡簿內頁與電子書排版</span><span lang="en">Print contact-book spreads &amp; e-book layout</span></li>
+          <li><span lang="zh">社群貼文與視覺內容編排</span><span lang="en">Social-media posts &amp; visual content layout</span></li>
+          <li><span lang="zh">成品影像後製</span><span lang="en">Product photo retouching</span></li>
+        </ul>
+      </div>
+    </div>
+    <h4 class="p-h reveal"><span lang="zh">成果</span><span lang="en">Highlights</span></h4>
+    <div class="shots reveal">
+      <button class="shot zi" type="button" data-g="shots" data-full="img/p1.jpg"><img src="img/tp1.jpg" alt="紙本聯絡簿內頁 Print contact book spreads" loading="lazy"><span><span lang="zh">紙本聯絡簿內頁</span><span lang="en">Print contact book spreads</span></span></button>
+      <button class="shot zi" type="button" data-g="shots" data-full="img/p2.jpg"><img src="img/tp2.jpg" alt="年級分級封面 Graded editions" loading="lazy"><span><span lang="zh">年級分級封面</span><span lang="en">Graded editions</span></span></button>
+      <button class="shot zi" type="button" data-g="shots" data-full="img/p3.jpg"><img src="img/tp3.jpg" alt="電子聯絡簿 E-contact book" loading="lazy"><span><span lang="zh">電子聯絡簿</span><span lang="en">E-contact book</span></span></button>
+      <button class="shot zi" type="button" data-g="shots" data-full="img/p4.jpg"><img src="img/tp4.jpg" alt="翻頁互動頁 Flip-to-reveal page" loading="lazy"><span><span lang="zh">翻頁互動頁</span><span lang="en">Flip-to-reveal page</span></span></button>
+      <button class="shot zi" type="button" data-g="shots" data-full="img/p5.jpg"><img src="img/tp5.jpg" alt="影片教學 Video tutorials" loading="lazy"><span><span lang="zh">影片教學</span><span lang="en">Video tutorials</span></span></button>
+    </div>
+    <h4 class="p-h reveal"><span lang="zh">社群貼文</span><span lang="en">Social posts</span></h4>
+    <div class="ig-wrap reveal"><div class="ig"><button class="zi" type="button" data-g="ig" data-full="img/ig1.jpg"><img src="img/tig1.jpg" alt="Social post 1" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig2.jpg"><img src="img/tig2.jpg" alt="Social post 2" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig3.jpg"><img src="img/tig3.jpg" alt="Social post 3" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig4.jpg"><img src="img/tig4.jpg" alt="Social post 4" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig5.jpg"><img src="img/tig5.jpg" alt="Social post 5" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig6.jpg"><img src="img/tig6.jpg" alt="Social post 6" loading="lazy"></button></div><div class="ig-t"><p class="zh" lang="zh">為專題的 Instagram 設計兩個系列的圖文版型：封面與內容頁共用同一套色彩與字級，讓資訊在手機上也能快速閱讀。</p><p class="en" lang="en">Designed two post series on a shared template: cover and content pages use the same colors and type scale, so information stays quick to read on a phone.</p></div></div>
+    <h4 class="p-h reveal"><span lang="zh">成品影像後製</span><span lang="en">Image retouching</span></h4>
+    <div class="cmps reveal">
+      <div><div class="cmp" data-a="img/c1a.jpg" data-b="img/c1b.jpg"></div>
+        <p class="cmp-note"><b><span lang="zh">角色遊戲卡</span><span lang="en">Character game cards</span></b><span lang="zh">校正原圖偏色與灰階漸層背景，改為乾淨的白色背景，並調整亮度與對比，讓卡牌色彩更準確。</span><span lang="en">Corrected the color cast and grey gradient, replaced the backdrop with clean white, and balanced brightness and contrast.</span></p></div>
+      <div><div class="cmp" data-a="img/c2a.jpg" data-b="img/c2b.jpg"></div>
+        <p class="cmp-note"><b><span lang="zh">聯絡簿封面</span><span lang="en">Contact book covers</span></b><span lang="zh">清理攝影棚場景（黑色布幕、反光光斑、散落卡牌），提高曝光並調暖色調。</span><span lang="en">Cleaned up the studio set (curtain, light spot, stray cards), lifted exposure and warmed the tones.</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Playground：個人拼貼／AIGC。要啟用：把圖放進 img/、在下面的 .ig 裡加按鈕（格式同專題的貼文），再刪掉 section 的 hidden -->
+<section id="play" class="sec" hidden>
+  <div class="wrap">
+    <p class="eyebrow reveal"><span lang="zh">個人實驗</span><span lang="en">Personal experiments</span></p>
+    <h2 class="reveal">Playground</h2>
+    <p class="bio zh reveal" lang="zh">個人拼貼與生成式工具的創作實驗：由我主導構想與構圖，再用 Photoshop 後製調整。</p>
+    <p class="bio en reveal" lang="en">Personal experiments in collage and generative tools (Recraft, Google Flow). I direct the idea and composition, then refine in Photoshop.</p>
+    <div class="ig play-grid reveal"><!-- <button class="zi" type="button" data-g="play" data-full="img/play1.jpg"><img src="img/tplay1.jpg" alt="..."></button> --></div>
+  </div>
+</section>
+
+<section id="about" class="sec">
+  <div class="wrap">
+    <div class="about-grid">
+      <!-- 目前是暫用的插畫頭像；想換成照片，直接覆蓋 img/me.jpg 即可 -->
+      <div class="polaroid reveal"><img src="img/me.jpg" alt="Hui Jhen"></div>
+      <div>
+        <p class="eyebrow reveal"><span lang="zh">關於我</span><span lang="en">About me</span></p>
+        <h2 class="reveal">Hui Jhen</h2>
+        <p class="tagline reveal"><span lang="zh">把複雜的資訊，排得清楚又有溫度。</span><span lang="en">Making dense information clear, orderly and warm.</span></p>
+        <p class="status reveal"><span class="dot"></span><span lang="zh">求職中</span><span lang="en">Open to work</span><small><span lang="zh">平面設計／美編・全職・接受遠端</span><span lang="en">Graphic &amp; layout design · Full-time · Remote OK</span></small></p>
+        <p class="bio zh reveal"><span lang="zh">我喜歡把繁雜的資訊整理成清楚、好讀的版面。從菜單、手冊到資訊圖表，習慣先釐清閱讀順序與層次，再用色彩和留白讓內容更有條理。</span><span lang="en">I turn dense information into clear, easy-to-read layouts. From menus and booklets to infographics, I start by sorting out reading order and hierarchy, then use color and white space to keep the content orderly.</span></p>
+        <dl class="facts reveal">
+          <div><dt><span lang="zh">學歷</span><span lang="en">Education</span></dt><dd><span lang="zh">國立臺北商業大學・商業設計管理系（2023–2025）</span><span lang="en">National Taipei University of Business, Commercial Design &amp; Management (2023–2025)</span></dd></div>
+          <div><dt><span lang="zh">工具</span><span lang="en">Tools</span></dt><dd>Photoshop・Illustrator・InDesign</dd></div>
+          <div><dt><span lang="zh">技能</span><span lang="en">Skills</span></dt><dd><span lang="zh">平面設計・排版設計・商業修圖</span><span lang="en">Graphic Design · Layout Design · Commercial Retouching</span></dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="contact reveal">
+      <p class="c-t"><span lang="zh">有合作或工作機會，歡迎來信</span><span lang="en">Have a project or an opening? Let's talk.</span></p>
+      <div class="c-btns">
+        <a class="btn" href="mailto:ppqq98741@gmail.com">✉ <span lang="zh">寄信給我</span><span lang="en">Email me</span></a>
+        <button class="btn ghost" id="copyMail" type="button"><span class="lbl"><span lang="zh">複製 Email</span><span lang="en">Copy email</span></span><span class="ok"><span lang="zh">已複製</span><span lang="en">Copied</span></span></button>
+      </div>
+    </div>
+  </div>
+</section>
+<footer class="foot">© 2026 Hui Jhen</footer>
+<dialog id="lb">
+  <button class="lb-close" id="lb-x" type="button" aria-label="Close">✕</button>
+  <div class="lb">
+    <div class="lb-img"><div class="zbox" id="zb"><img id="lb-img" alt=""></div><div class="zbtns"><button type="button" data-z="+" aria-label="Zoom in">＋</button><button type="button" data-z="-" aria-label="Zoom out">－</button><button type="button" data-z="r" aria-label="Reset">⟲</button></div></div>
+    <div class="lb-txt">
+      <h3 class="zh" id="lb-zh"></h3>
+      <div class="cat" id="lb-cat"></div>
+      <p class="zh" id="lb-dzh"></p>
+            <div class="lb-nav"><button id="lb-p" type="button">← Prev</button><span id="lb-n"></span><button id="lb-nx" type="button">Next →</button></div>
+    </div>
+  </div>
+</dialog>
+<dialog id="zv"><button class="lb-close" id="zv-x" type="button" aria-label="Close">✕</button><div class="zwrap"><div class="zbox" id="zb2"><img id="zv-img" alt=""></div><div class="zbtns"><button type="button" data-z="+" aria-label="Zoom in">＋</button><button type="button" data-z="-" aria-label="Zoom out">－</button><button type="button" data-z="r" aria-label="Reset">⟲</button></div><button class="zarr prev" id="zv-p" type="button" aria-label="Previous" hidden>‹</button><button class="zarr next" id="zv-nx" type="button" aria-label="Next" hidden>›</button><div class="znav" hidden><span id="zv-n"></span></div></div></dialog>
+<button id="snd" class="nudge" type="button" aria-label="Sound off" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/><line class="slash" x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+<audio id="bgm" src="audio/bg.mp3" loop preload="none"></audio>
+
+<script>
+/* ============ 1. 在這裡設定你的物件 ============
+   src   : 你的去背 PNG 路徑，例如 'img/lamp.png'（留空會顯示色塊預覽）
+   x, y  : 位置，佔畫面的百分比（左上角）
+   w     : 寬度，佔畫面寬度的 vw
+   r     : 初始旋轉角度（度）
+   link  : 點擊後捲動到哪個區塊的 id（選填，例如 'about'）；tag 是物件下方的小標籤文字
+   sound : hover 音效 → whoosh / fizz / pop / boing / clink / tok
+   anim  : hover 動畫 → wiggle 搖晃 / swing 鐘擺 / grow 放大 / spin 轉一圈 / bounce 彈跳 */
+const OBJECTS=[
+ {name:'Toast',sound:'whoosh',link:'works',tag:'Works ↓',   src:'img/to.png', x:3, y:8, w:17,r:-10,anim:'spin',  color:'#e0a84a'},
+ {name:'Soda',sound:'fizz',link:'play',tag:'Play ↓',    src:'img/st.png', x:15,y:52,w:10,r:8,  anim:'wiggle',color:'#e8556a'},
+ {name:'Canele',sound:'pop',  src:'img/ch.png', x:5, y:68,w:9, r:-8, anim:'grow',  color:'#6b3a22'},
+ {name:'Matcha Berry',sound:'boing',link:'projects',tag:'Projects ↓',src:'img/smt.png',x:76,y:8,w:14,r:6,anim:'bounce',color:'#8bb86a'},
+ {name:'Latte',sound:'clink',   src:'img/co.png', x:86,y:50,w:9, r:-6, anim:'wiggle',color:'#c9a27a'},
+ {name:'Matcha',sound:'tok',link:'about',tag:'About me ↓',  src:'img/ma.png', x:70,y:66,w:12,r:10, anim:'grow',  color:'#6f8f5e'}
+];
+
+/* ============ 2. 動畫對照表：[animation 值, transform-origin] ============ */
+const ANIMS={
+ wiggle:['wiggle .6s ease'],
+ swing :['swing 1.2s ease-out','50% 0'],   /* 以頂端為軸心擺動 */
+ spin  :['spin .8s cubic-bezier(.4,0,.2,1)'],
+ bounce:['bounce .5s ease'],
+ grow  :['none']
+};
+
+/* ============ 3. 程式（一般不用改）============ */
+const stage=document.getElementById('stage');let z=10;
+const placeholder=o=>'data:image/svg+xml,'+encodeURIComponent(
+ `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect x="10" y="10" width="280" height="280" rx="28" fill="${o.color}"/><text x="150" y="160" font-size="36" text-anchor="middle" fill="#fff" font-family="sans-serif">${o.name}</text></svg>`);
+
+/* ============ 音效（用 Web Audio 即時合成，不需要音檔）============
+   瀏覽器規定要使用者先點一下頁面，才能發出聲音。 */
+let actx,master,enabled=false,unlocked=false;
+const sndBtn=document.getElementById('snd'),bgm=document.getElementById('bgm'),MUSIC_VOL=.5;
+function unlock(){if(!actx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;actx=new C();master=actx.createGain();master.gain.value=.5;master.connect(actx.destination)}
+ if(actx.state==='suspended')actx.resume();unlocked=true}
+let fadeT;function fadeTo(v,done){clearInterval(fadeT);fadeT=setInterval(()=>{const d=v-bgm.volume;if(Math.abs(d)<.03){bgm.volume=v;clearInterval(fadeT);done&&done();return}bgm.volume=Math.max(0,Math.min(1,bgm.volume+Math.sign(d)*.03))},60)}
+/* 音符按鈕：同時開關背景音樂與物件音效（預設關閉） */
+function setSound(on){enabled=on;sndBtn.classList.toggle('on',on);sndBtn.classList.remove('nudge');sndBtn.setAttribute('aria-pressed',on);sndBtn.setAttribute('aria-label',on?'Sound on':'Sound off');
+ if(on){unlock();bgm.volume=0;bgm.play().catch(()=>{});fadeTo(MUSIC_VOL)}else fadeTo(0,()=>bgm.pause())}
+sndBtn.addEventListener('click',()=>setSound(!enabled));
+document.addEventListener('visibilitychange',()=>{if(!enabled)return;if(document.hidden)bgm.pause();else bgm.play().catch(()=>{})});
+
+function tone(f,d,{type='sine',vol=.3,to,at=0}={}){const t=actx.currentTime+at,o=actx.createOscillator(),g=actx.createGain();
+ o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ o.connect(g).connect(master);o.start(t);o.stop(t+d+.05)}
+function noise(d,{vol=.2,type='bandpass',f=1000,to,at=0,q=1}={}){const t=actx.currentTime+at,n=Math.floor(actx.sampleRate*d),
+ b=actx.createBuffer(1,n,actx.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;
+ const s=actx.createBufferSource();s.buffer=b;const fl=actx.createBiquadFilter();fl.type=type;fl.Q.value=q;fl.frequency.setValueAtTime(f,t);
+ if(to)fl.frequency.exponentialRampToValueAtTime(to,t+d);
+ const g=actx.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+ s.connect(fl).connect(g).connect(master);s.start(t)}
+
+const SFX={
+ whoosh(){noise(.35,{vol:.25,f:400,to:2500,q:2});tone(1320,.35,{vol:.15,at:.28})},                 /* 吐司：咻 + 叮 */
+ fizz(){noise(.6,{vol:.18,type:'highpass',f:3500});for(let i=0;i<6;i++)tone(700+Math.random()*900,.06,{vol:.12,at:Math.random()*.4,to:1600})}, /* 氣泡飲：嘶嘶氣泡 */
+ pop(){tone(200,.15,{vol:.4,to:80});noise(.04,{vol:.15,f:1200})},                                   /* 可麗露：軟軟的啵 */
+ boing(){tone(260,.12,{type:'triangle',vol:.3,to:700});tone(700,.2,{type:'triangle',vol:.3,at:.12,to:350})}, /* 抹茶杯：彈跳 */
+ clink(){tone(2600,.25,{vol:.18});tone(3400,.2,{vol:.12,at:.07});noise(.03,{vol:.1,type:'highpass',f:4000})}, /* 冰拿鐵：冰塊叮噹 */
+ tok(){noise(.05,{vol:.3,f:900,q:3});tone(520,.18,{vol:.3,to:380})}                                  /* 馬克杯：陶瓷輕敲 */
+};
+function play(o){if(!enabled||!unlocked)return;const n=performance.now();if(n-(o.last||0)<700)return;o.last=n;if(SFX[o.sound])SFX[o.sound]()}
+
+function makeDraggable(el,onTap){const touch=matchMedia('(pointer:coarse)').matches;
+ let sx,sy,dx=0,dy=0,moved=0,on=false;
+ el.addEventListener('pointerdown',e=>{on=true;moved=0;sx=e.clientX-dx;sy=e.clientY-dy;el.setPointerCapture(e.pointerId);el.style.zIndex=++z});
+ el.addEventListener('pointermove',e=>{
+  if(!on||touch)return;const nx=e.clientX-sx,ny=e.clientY-sy;
+  moved+=Math.abs(nx-dx)+Math.abs(ny-dy);dx=nx;dy=ny;
+  if(moved>4)el.classList.add('drag');
+  el.style.setProperty('--dx',dx+'px');el.style.setProperty('--dy',dy+'px');
+ });
+ const end=()=>{if(!on)return;on=false;
+  if(moved<=4){onTap&&onTap();el.classList.add('play');setTimeout(()=>el.classList.remove('play'),1200)} /* 手機點一下播放動畫 */
+  el.classList.remove('drag')};
+ el.addEventListener('pointerup',end);el.addEventListener('pointercancel',()=>{on=false;el.classList.remove('drag')});
+}
+
+const playOn=!document.getElementById('play').hidden;document.getElementById('nav-play').hidden=!playOn;
+OBJECTS.forEach(o=>{if(o.link&&document.getElementById(o.link).hidden)delete o.link});
+OBJECTS.forEach((o,i)=>{
+ const el=document.createElement('div'),a=ANIMS[o.anim]||ANIMS.wiggle;
+ el.className='obj';el.dataset.anim=o.anim;
+ Object.assign(el.style,{left:o.x+'%',top:o.y+'%',width:`max(calc(${o.w}vw * var(--k,1)),var(--minw,64px))`,zIndex:z++});
+ el.style.setProperty('--r',(o.r||0)+'deg');
+ el.style.setProperty('--anim',a[0]);el.style.setProperty('--origin',a[1]||'50% 50%');
+ const im=new Image();im.src=o.src||placeholder(o);im.alt=o.name;im.draggable=false;
+ el.appendChild(im);
+ if(o.link){const t=document.createElement('span');t.className='tag';t.textContent=o.tag||'Open';el.appendChild(t);el.classList.add('link')}
+ stage.appendChild(el);setTimeout(()=>el.classList.add('in'),150+i*120);
+ 
+ makeDraggable(el,()=>{play(o);if(o.link)document.getElementById(o.link).scrollIntoView({block:'start'})});
+ el.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')play(o)});
+});
+
+
+/* ============ 圖片縮放：滾輪／雙指縮放、拖曳平移、雙擊切換、按鈕 ============ */
+function makeZoom(box,img){let s=1,x=0,y=0,d0=0,s0=1;const pts=new Map();
+ const ap=()=>{if(s<=1){s=1;x=y=0}img.style.transform=`translate(${x}px,${y}px) scale(${s})`;box.classList.toggle('zoomed',s>1)};
+ const at=(k,cx,cy)=>{const r=box.getBoundingClientRect(),px=cx-r.left-r.width/2,py=cy-r.top-r.height/2,ns=Math.min(6,Math.max(1,s*k)),f=ns/s;x=px-(px-x)*f;y=py-(py-y)*f;s=ns;ap()};
+ box.addEventListener('wheel',e=>{e.preventDefault();at(e.deltaY<0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
+ box.addEventListener('pointerdown',e=>{box.setPointerCapture(e.pointerId);pts.set(e.pointerId,[e.clientX,e.clientY]);if(pts.size==2){const[a,b]=[...pts.values()];d0=Math.hypot(a[0]-b[0],a[1]-b[1]);s0=s}});
+ box.addEventListener('pointermove',e=>{const p=pts.get(e.pointerId);if(!p)return;
+  if(pts.size==2){pts.set(e.pointerId,[e.clientX,e.clientY]);const[a,b]=[...pts.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);at(s0*d/d0/s,(a[0]+b[0])/2,(a[1]+b[1])/2)}
+  else{if(s>1){x+=e.clientX-p[0];y+=e.clientY-p[1];ap()}pts.set(e.pointerId,[e.clientX,e.clientY])}});
+ const up=e=>pts.delete(e.pointerId);box.addEventListener('pointerup',up);box.addEventListener('pointercancel',up);
+ box.addEventListener('dblclick',e=>{if(s>1){s=1;ap()}else at(2.5,e.clientX,e.clientY)});
+ return{reset(){s=1;ap()},zoom(k){const r=box.getBoundingClientRect();at(k,r.left+r.width/2,r.top+r.height/2)}}}
+function wireZoomBtns(root,Z){root.querySelectorAll('[data-z]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.z;if(v==='r')Z.reset();else Z.zoom(v==='+'?1.4:1/1.4)}))}
+const Z=makeZoom(document.getElementById('zb'),document.getElementById('lb-img'));wireZoomBtns(document.getElementById('lb'),Z);
+
+const T=(z,e)=>`<span lang="zh">${z}</span><span lang="en">${e}</span>`;
+/* ============ 作品資料：每件作品一筆，可自行增減 ============
+   i=圖片編號（img/w{i}.jpg 大圖、img/tw{i}.jpg 縮圖）  tw/th=縮圖尺寸
+   zh/en=標題  czh/cen=類別  dzh/den=中/英文說明 */
+const WORKS=[{"i": 7, "zh": "九丹煮奶｜飲料菜單", "en": "Jiudan Zhunai — Drink Menu", "czh": "菜單設計", "cen": "Menu Design", "dzh": "針對高密度品項進行系統化資訊分流，劃分熱銷排行、茶底分類與客製加料區，建立清晰的閱讀階層。字體搭配大地米色調與深色底框，在確保櫃台點餐快速辨識的同時，維持溫潤質樸的品牌手作感。", "den": "Systematic information sorting for a dense product list, dividing the menu into best-sellers, tea bases and a customizable toppings zone to build a clear reading hierarchy. Earthy beige tones with dark frames keep items quickly recognizable at the counter while preserving a warm, handcrafted feel.", "tw": 900, "th": 663, "kind": "Client work 客戶案"}, {"i": 4, "zh": "台灣髒髒空氣計畫", "en": "Taiwan Dirty Air Project", "czh": "地圖設計", "cen": "Map Design", "dzh": "以 PM2.5 數據設計資訊圖，紅黃綠呈現空氣品質，點狀層次顯示濃度，並標示前三佳與前三劣地區及污染來源。底部整合監測站數據，資訊完整且視覺清晰。", "den": "An infographic built on PM2.5 data: red, yellow and green show air quality, while layered dots indicate concentration. The three best and three worst regions are marked along with pollution sources, and monitoring-station data is integrated at the bottom for complete, clearly legible information.", "tw": 900, "th": 983, "kind": "Student project 課程作業"}, {"i": 1, "zh": "evian 礦泉水", "en": "evian Mineral Water", "czh": "瓶標設計", "cen": "Label Design", "dzh": "保留品牌標誌性色彩，重新組合元素創造新視覺體驗。以漸層背景凸顯 LOGO，並透過留白突顯核心焦點。反面以漸層搭配白字，保持整體協調與品牌調性。", "den": "Keeps the brand's signature colors while recombining its elements into a fresh visual experience. A gradient background lets the logo stand out, and generous white space sharpens the focal point. The reverse side pairs a gradient with white type to stay consistent with the brand's tone.", "tw": 900, "th": 977, "kind": "Student project 課程作業"}, {"i": 5, "zh": "康莊有機聚落", "en": "Kangzhuang Organic Village", "czh": "排版設計", "cen": "Layout Design", "dzh": "農場為主題，運用鮮明色彩展現自然活力。以色彩邊框建立版面結構，清楚分隔單元並提升閱讀直覺性，營造趣味與層次感，讓內容更有秩序與吸引力。", "den": "A farm-themed layout that uses vivid color to express the vitality of nature. Colored borders structure the pages and clearly separate each unit, improving intuitive readability and adding a playful sense of hierarchy, so the content feels more orderly and engaging.", "tw": 900, "th": 977, "kind": "Student project 課程作業"}, {"i": 6, "zh": "正一企業社", "en": "Zhengyi Enterprise", "czh": "名片設計", "cen": "Business Card Design", "dzh": "針對工程產業，採黃色傳達活力與土地聯想，深灰象徵塵土與穩重，整體配色營造專業與信賴感，呈現沉穩且具辨識度的品牌形象。", "den": "Designed for the construction trade: yellow conveys energy and an association with the land, while dark grey suggests dust and steadiness. Together the palette builds professionalism and trust, presenting a calm, recognizable brand image.", "tw": 691, "th": 750, "kind": "Client work 客戶案"}, {"i": 2, "zh": "波爾茶錫蘭紅茶", "en": "Boer Tea Ceylon Black Tea", "czh": "瓶標設計", "cen": "Label Design", "dzh": "運用馬賽克與像素化視覺，結合遊戲元素打造趣味懷舊感。品牌角色與標題像素化，瓶身採粗框字體與紅藍配色，呈現高級質感，同時保有辨識度並注入年輕化氛圍。", "den": "Pixelated, mosaic visuals blended with game elements create a playful, nostalgic feel. The brand character and title are pixelated, while the bottle uses bold-outlined type and a red-and-blue palette for a premium look that stays recognizable and feels younger.", "tw": 900, "th": 973, "kind": "Student project 課程作業"}, {"i": 3, "zh": "茅香碳坊", "en": "Maoxiang Tanfang", "czh": "包裝設計", "cen": "Packaging Design", "dzh": "以油桐花為主題，命名「春覺」寓意喚醒感官。採手繪插畫呈現花開意象，字體融入花心色彩並搭配印章構圖，增添文藝質感與東方韻味，呼應香氛產品特質。", "den": "Themed around the tung blossom and named \"Spring Awakening\" (春覺) to suggest awakening the senses. Hand-drawn illustration captures flowers in bloom, and the type borrows the color of the blossom's heart, paired with a seal-style composition. The result adds literary charm and an Eastern flavor that echoes the fragrance products.", "tw": 900, "th": 975, "kind": "Student project 課程作業"}];
+const grid=document.getElementById('grid'),lb=document.getElementById('lb'),CARDS=[];let cur=0;
+WORKS.forEach((w,i)=>{const b=document.createElement('button');b.type='button';b.className='card reveal';
+ b.innerHTML=`<img class="th" src="img/tw${w.i}.jpg" width="${w.tw}" height="${w.th}" alt="${w.zh} ${w.en}" loading="lazy" decoding="async"><span class="zt">${T(w.zh,w.en)}</span><span class="ct">${T(w.czh,w.cen)}</span><span class="kd${w.kind.startsWith('Client')?' client':''}">${w.kind.startsWith('Client')?T('客戶案','Client work'):T('課程作業','Student project')}</span>`;
+ b.addEventListener('click',()=>openWork(i));CARDS.push(b)});
+let colN=0;function place(){const n=innerWidth>=900?3:innerWidth>=560?2:1;if(n===colN)return;colN=n;grid.textContent='';const cols=[],hs=[];
+ for(let c=0;c<n;c++){const d=document.createElement('div');d.className='mcol';grid.appendChild(d);cols.push(d);hs.push(0)}
+ CARDS.forEach((b,i)=>{const w=WORKS[i];let m=0;for(let c=1;c<n;c++)if(hs[c]<hs[m])m=c;cols[m].appendChild(b);hs[m]+=w.th/w.tw+.28})}
+place();addEventListener('resize',place);
+function openWork(i){Z.reset();const n=WORKS.length;cur=(i+n)%n;const w=WORKS[cur],$=id=>document.getElementById(id);
+ $('lb-img').src='img/w'+w.i+'.jpg';$('lb-img').alt=w.zh+' '+w.en;
+ $('lb-zh').innerHTML=T(w.zh,w.en);$('lb-cat').innerHTML=T(w.czh,w.cen)+' · '+(w.kind.startsWith('Client')?T('客戶案','Client work'):T('課程作業','Student project'));$('lb-dzh').innerHTML=T(w.dzh,w.den);
+ $('lb-n').textContent=(cur+1)+' / '+n;
+ if(!lb.open)lb.showModal();lb.scrollTop=0}
+document.getElementById('lb-x').addEventListener('click',()=>lb.close());
+document.getElementById('lb-p').addEventListener('click',()=>openWork(cur-1));
+document.getElementById('lb-nx').addEventListener('click',()=>openWork(cur+1));
+lb.addEventListener('click',e=>{if(e.target===lb)lb.close()});
+addEventListener('keydown',e=>{if(!lb.open)return;if(e.key==='ArrowLeft')openWork(cur-1);if(e.key==='ArrowRight')openWork(cur+1)});
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');cio.unobserve(e.target);setTimeout(()=>e.target.style.transitionDelay='',1200)}}),{threshold:.1});
+document.querySelectorAll('.card.reveal').forEach((el,i)=>{el.style.transitionDelay=(i%3)*.08+'s';cio.observe(el)});
+
+/* ============ 專題：圖片放大、前後對照 ============ */
+const zv=document.getElementById('zv'),Z2=makeZoom(document.getElementById('zb2'),document.getElementById('zv-img'));wireZoomBtns(zv,Z2);
+document.getElementById('zv-x').addEventListener('click',()=>zv.close());
+zv.addEventListener('click',e=>{if(e.target===zv)zv.close()});
+let zg=[],zi=0;const zvImg=document.getElementById('zv-img');
+function openZ(list,i){const n=list.length;zg=list;zi=(i+n)%n;const b=list[zi];Z2.reset();zvImg.src=b.dataset.full;zvImg.alt=(b.querySelector('img')||{}).alt||'';
+ zv.querySelector('.znav').hidden=n<2;['zv-p','zv-nx'].forEach(id=>document.getElementById(id).hidden=n<2);document.getElementById('zv-n').textContent=(zi+1)+' / '+n;if(!zv.open)zv.showModal()}
+document.querySelectorAll('.zi').forEach(b=>b.addEventListener('click',()=>{const g=b.dataset.g,list=g?[...document.querySelectorAll('.zi[data-g="'+g+'"]')]:[b];openZ(list,list.indexOf(b))}));
+(()=>{const zb=document.getElementById('zb2');let sx=0,sy=0;
+ zb.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});
+ zb.addEventListener('pointerup',e=>{if(e.pointerType!=='touch'||zb.classList.contains('zoomed')||zg.length<2)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>60&&Math.abs(dy)<50)openZ(zg,zi+(dx<0?1:-1))})})();
+document.getElementById('zv-p').addEventListener('click',()=>openZ(zg,zi-1));
+document.getElementById('zv-nx').addEventListener('click',()=>openZ(zg,zi+1));
+addEventListener('keydown',e=>{if(!zv.open||zg.length<2)return;if(e.key==='ArrowLeft')openZ(zg,zi-1);if(e.key==='ArrowRight')openZ(zg,zi+1)});
+document.querySelectorAll('.cmp').forEach(c=>{const mk=n=>{const i=new Image();i.src=n;i.alt='';i.draggable=false;return i},a=mk(c.dataset.a),b=mk(c.dataset.b);a.className='bf';
+ c.append(b,a);c.insertAdjacentHTML('beforeend','<div class="hd"></div><span class="tg" style="left:10px"><span lang="zh">原圖</span><span lang="en">Before</span></span><span class="tg" style="right:10px"><span lang="zh">後製</span><span lang="en">After</span></span><input type="range" min="0" max="100" value="50" aria-label="Before and after">');
+ c.querySelector('input').addEventListener('input',e=>c.style.setProperty('--p',e.target.value+'%'))});
+
+
+/* ============ 語言切換（預設依瀏覽器語言，選過會記住）與複製 Email ============ */
+function setLang(l,save){const d=document.documentElement;d.dataset.lang=l;d.lang=l==='zh'?'zh-Hant':'en';
+ document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+ if(save){try{localStorage.setItem('lang',l)}catch(e){}}}
+document.querySelectorAll('#lang button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.l,true)));
+setLang(document.documentElement.dataset.lang,false);
+const cpBtn=document.getElementById('copyMail');
+cpBtn.addEventListener('click',async()=>{const m='ppqq98741@gmail.com';
+ try{await navigator.clipboard.writeText(m)}catch(e){const t=document.createElement('textarea');t.value=m;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
+ cpBtn.classList.add('copied');setTimeout(()=>cpBtn.classList.remove('copied'),1600)});
+
+/* 自我介紹區的內容捲到時依序淡入 */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')}),{threshold:.2});
+document.querySelectorAll('.reveal:not(.card)').forEach((el,i)=>{el.style.transitionDelay=(i*.08)+'s';io.observe(el)});
+</script>
+</body>
+</html>
