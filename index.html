@@ -46,8 +46,9 @@ h1{margin:0;font:400 clamp(64px,10vw,130px)/1 "Mrs Saint Delafield",cursive}
 
 /* 物件上的小標籤（可點擊的物件才有） */
 .tag{position:absolute;left:50%;top:0;opacity:0;transform:translate(-50%,-70%) rotate(calc(var(--r,0deg) * -1));white-space:nowrap;font:12px "IBM Plex Mono",monospace;background:var(--ink);color:#fff;padding:4px 11px;border-radius:999px;pointer-events:none;transition:opacity .2s,transform .25s}
-.obj.link:is(:hover,.play) .tag{opacity:1;transform:translate(-50%,-125%) rotate(calc(var(--r,0deg) * -1))}
-@media (hover:none){.tag{opacity:1;transform:translate(-50%,-110%) rotate(calc(var(--r,0deg) * -1))}}
+@media (hover:hover){.obj.link:hover .tag{opacity:1;transform:translate(-50%,-125%) rotate(calc(var(--r,0deg) * -1))}}
+.obj.link.armed .tag{opacity:1;transform:translate(-50%,-125%) rotate(calc(var(--r,0deg) * -1))}
+
 
 /* 自我介紹區 */
 body .sec{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:96px 24px;border-top:1px solid rgba(43,43,51,.08)}
@@ -279,6 +280,25 @@ button#snd:active{transform:scale(.92)}
 #about .tagline{font-size:clamp(17px,1.8vw,21px)}
 #about .facts dd{font-size:14px}
 #about .c-t{font-size:clamp(17px,1.9vw,22px)}
+/* 物件位置：桌機沿用原數字；直式手機（寬 ≤760px）改用另一組 */
+.obj{left:var(--pl);top:var(--pt);width:var(--pw)}
+@media (max-width:760px) and (orientation:portrait){
+ .obj{left:var(--ml);top:var(--mt);width:var(--mw)}
+ .obj.no-m{display:none}
+ #hero{padding:0 28px}
+ .hero-kicker{font-size:10.5px;letter-spacing:.24em;padding-left:.24em}
+ .hero-line{font-size:12.5px;line-height:1.75;letter-spacing:0}
+ #nav{font-size:10.5px}
+ #nav a{padding:6px 7px}
+}
+.obj{cursor:pointer;touch-action:pan-y}
+.cmp-list{margin:6px 0 0;padding-left:1.2em}
+.cmp-list li{margin:2px 0}
+.p-sub + .p-links{margin-top:-14px}
+.p-links{margin:0 0 28px;font-size:13px}
+.ig-t .p-links{margin:14px 0 0}
+.p-links a{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.p-links a:hover{color:#6f8f5e}
 </style>
 <script>document.documentElement.dataset.lang=(function(){try{var v=localStorage.getItem("lang");if(v==="zh"||v==="en")return v}catch(e){}return /^zh/i.test(navigator.language||"")?"zh":"en"})()</script>
 </head>
@@ -308,7 +328,8 @@ button#snd:active{transform:scale(.92)}
     <p class="eyebrow reveal"><span lang="zh">專題</span><span lang="en">Case study</span></p>
     <h2 class="reveal zhh">知性囝囝仔<span>Brainy Nannan</span></h2>
     <h3 class="p-title reveal"><span lang="zh">預防性犯罪聯絡簿</span><span lang="en">A sexual-crime prevention contact book</span></h3>
-    <p class="p-sub reveal"><span lang="zh">團隊專題・6 人・Illustrator, Photoshop, InDesign</span><span lang="en">Team project · 6 members · Illustrator, Photoshop, InDesign</span></p>
+    <p class="p-sub reveal"><span lang="zh">團隊專題・6 人</span><span lang="en">Team project · 6 members</span></p>
+    <p class="p-links reveal"><a href="https://sites.google.com/ntub.edu.tw/brainynan-2425/%E9%A6%96%E9%A0%81" target="_blank" rel="noopener noreferrer"><span lang="zh">專題官網 ↗</span><span lang="en">Project website ↗</span></a></p>
     <!-- 團隊成員：想公開時，填入名字並刪掉下一行的 hidden -->
     <p class="p-sub" id="team" hidden>Team: Name · Name · Name · Name · Name · Name</p>
     <button class="p-hero zi reveal" type="button" data-full="img/p0.jpg"><img src="img/p0.jpg" width="1800" height="1273" alt="Brainy Nannan overview"></button>
@@ -337,13 +358,13 @@ button#snd:active{transform:scale(.92)}
       <button class="shot zi" type="button" data-g="shots" data-full="img/p5.jpg"><img src="img/tp5.jpg" alt="影片教學 Video tutorials" loading="lazy"><span><span lang="zh">影片教學</span><span lang="en">Video tutorials</span></span></button>
     </div>
     <h4 class="p-h reveal"><span lang="zh">社群貼文</span><span lang="en">Social posts</span></h4>
-    <div class="ig-wrap reveal"><div class="ig"><button class="zi" type="button" data-g="ig" data-full="img/ig1.jpg"><img src="img/tig1.jpg" alt="Social post 1" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig2.jpg"><img src="img/tig2.jpg" alt="Social post 2" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig3.jpg"><img src="img/tig3.jpg" alt="Social post 3" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig4.jpg"><img src="img/tig4.jpg" alt="Social post 4" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig5.jpg"><img src="img/tig5.jpg" alt="Social post 5" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig6.jpg"><img src="img/tig6.jpg" alt="Social post 6" loading="lazy"></button></div><div class="ig-t"><p class="zh" lang="zh">為專題的 Instagram 設計兩個系列的圖文版型：封面與內容頁共用同一套色彩與字級，讓資訊在手機上也能快速閱讀。</p><p class="en" lang="en">Designed two post series on a shared template: cover and content pages use the same colors and type scale, so information stays quick to read on a phone.</p></div></div>
+    <div class="ig-wrap reveal"><div class="ig"><button class="zi" type="button" data-g="ig" data-full="img/ig1.jpg"><img src="img/tig1.jpg" alt="Social post 1" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig2.jpg"><img src="img/tig2.jpg" alt="Social post 2" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig3.jpg"><img src="img/tig3.jpg" alt="Social post 3" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig4.jpg"><img src="img/tig4.jpg" alt="Social post 4" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig5.jpg"><img src="img/tig5.jpg" alt="Social post 5" loading="lazy"></button><button class="zi" type="button" data-g="ig" data-full="img/ig6.jpg"><img src="img/tig6.jpg" alt="Social post 6" loading="lazy"></button></div><div class="ig-t"><p class="zh" lang="zh">專題 Instagram 的衛教系列貼文：統一版型、色彩與字級，讓資訊在手機上也好讀。</p><p class="en" lang="en">A health-education series for the project's Instagram: one template, consistent color and type, easy to read on a phone.</p><p class="p-links"><a href="https://www.instagram.com/brainynan_2425/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></p></div></div>
     <h4 class="p-h reveal"><span lang="zh">成品影像後製</span><span lang="en">Image retouching</span></h4>
     <div class="cmps reveal">
       <div><div class="cmp" data-a="img/c1a.jpg" data-b="img/c1b.jpg"></div>
-        <p class="cmp-note"><b><span lang="zh">角色遊戲卡</span><span lang="en">Character game cards</span></b><span lang="zh">校正原圖偏色與灰階漸層背景，改為乾淨的白色背景，並調整亮度與對比，讓卡牌色彩更準確。</span><span lang="en">Corrected the color cast and grey gradient, replaced the backdrop with clean white, and balanced brightness and contrast.</span></p></div>
+        <div class="cmp-note"><b><span lang="zh">角色遊戲卡</span><span lang="en">Character game cards</span></b><ul class="cmp-list"><li><span lang="zh">去除偏灰藍的漸層背景，換成乾淨的白色背景</span><span lang="en">Replaced the grey-blue gradient backdrop with a clean white one</span></li><li><span lang="zh">校正偏色與亮度，讓卡牌色彩更貼近實物</span><span lang="en">Corrected color cast and brightness so the cards read true to life</span></li><li><span lang="zh">微調對比與銳利度，讓卡面文字更清楚</span><span lang="en">Tuned contrast and sharpness so the card text stays clear</span></li></ul></div></div>
       <div><div class="cmp" data-a="img/c2a.jpg" data-b="img/c2b.jpg"></div>
-        <p class="cmp-note"><b><span lang="zh">聯絡簿封面</span><span lang="en">Contact book covers</span></b><span lang="zh">清理攝影棚場景（黑色布幕、反光光斑、散落卡牌），提高曝光並調暖色調。</span><span lang="en">Cleaned up the studio set (curtain, light spot, stray cards), lifted exposure and warmed the tones.</span></p></div>
+        <div class="cmp-note"><b><span lang="zh">聯絡簿封面</span><span lang="en">Contact book covers</span></b><ul class="cmp-list"><li><span lang="zh">移除畫面中的雜物：黑色布幕與散落的卡牌</span><span lang="en">Removed distractions: the black curtain and stray cards</span></li><li><span lang="zh">消除背景上的反光光斑與不均勻的陰影</span><span lang="en">Cleaned up the backdrop: removed the light spot and uneven shadows</span></li><li><span lang="zh">提高曝光並調暖色調，讓封面明亮溫暖</span><span lang="en">Lifted exposure and warmed the tones so the covers feel bright and warm</span></li></ul></div></div>
     </div>
   </div>
 </section>
@@ -381,7 +402,6 @@ button#snd:active{transform:scale(.92)}
       <p class="c-t"><span lang="zh">有合作或工作機會，歡迎來信</span><span lang="en">Have a project or an opening? Let's talk.</span></p>
       <div class="c-btns">
         <a class="btn" href="mailto:ppqq98741@gmail.com">✉ <span lang="zh">寄信給我</span><span lang="en">Email me</span></a>
-        <button class="btn ghost" id="copyMail" type="button"><span class="lbl"><span lang="zh">複製 Email</span><span lang="en">Copy email</span></span><span class="ok"><span lang="zh">已複製</span><span lang="en">Copied</span></span></button>
       </div>
     </div>
   </div>
@@ -413,12 +433,12 @@ button#snd:active{transform:scale(.92)}
    sound : hover 音效 → whoosh / fizz / pop / boing / clink / tok
    anim  : hover 動畫 → wiggle 搖晃 / swing 鐘擺 / grow 放大 / spin 轉一圈 / bounce 彈跳 */
 const OBJECTS=[
- {name:'Toast',sound:'whoosh',link:'works',tag:'Works ↓',   src:'img/to.png', x:3, y:8, w:17,r:-10,anim:'spin',  color:'#e0a84a'},
- {name:'Soda',sound:'fizz',link:'play',tag:'Play ↓',    src:'img/st.png', x:15,y:52,w:10,r:8,  anim:'wiggle',color:'#e8556a'},
- {name:'Canele',sound:'pop',  src:'img/ch.png', x:5, y:68,w:9, r:-8, anim:'grow',  color:'#6b3a22'},
- {name:'Matcha Berry',sound:'boing',link:'projects',tag:'Projects ↓',src:'img/smt.png',x:76,y:8,w:14,r:6,anim:'bounce',color:'#8bb86a'},
- {name:'Latte',sound:'clink',   src:'img/co.png', x:86,y:50,w:9, r:-6, anim:'wiggle',color:'#c9a27a'},
- {name:'Matcha',sound:'tok',link:'about',tag:'About me ↓',  src:'img/ma.png', x:70,y:66,w:12,r:10, anim:'grow',  color:'#6f8f5e'}
+ {name:'Toast',m:{x:6,y:15,w:24},sound:'whoosh',link:'works',tag:'Works ↓',   src:'img/to.png', x:3, y:8, w:17,r:-10,anim:'spin',  color:'#e0a84a'},
+ {name:'Soda',m:{x:8,y:70,w:13},sound:'fizz',link:'play',tag:'Play ↓',    src:'img/st.png', x:15,y:52,w:10,r:8,  anim:'wiggle',color:'#e8556a'},
+ {name:'Canele',m:{x:40,y:77,w:17},sound:'pop',  src:'img/ch.png', x:5, y:68,w:9, r:-8, anim:'grow',  color:'#6b3a22'},
+ {name:'Matcha Berry',m:{x:68,y:15,w:24},sound:'boing',link:'projects',tag:'Projects ↓',src:'img/smt.png',x:76,y:8,w:14,r:6,anim:'bounce',color:'#8bb86a'},
+ {name:'Latte',m:null,sound:'clink',   src:'img/co.png', x:86,y:50,w:9, r:-6, anim:'wiggle',color:'#c9a27a'},
+ {name:'Matcha',m:{x:66,y:68,w:22},sound:'tok',link:'about',tag:'About me ↓',  src:'img/ma.png', x:70,y:66,w:12,r:10, anim:'grow',  color:'#6f8f5e'}
 ];
 
 /* ============ 2. 動畫對照表：[animation 值, transform-origin] ============ */
@@ -469,27 +489,16 @@ const SFX={
 };
 function play(o){if(!enabled||!unlocked)return;const n=performance.now();if(n-(o.last||0)<700)return;o.last=n;if(SFX[o.sound])SFX[o.sound]()}
 
-function makeDraggable(el,onTap){const touch=matchMedia('(pointer:coarse)').matches;
- let sx,sy,dx=0,dy=0,moved=0,on=false;
- el.addEventListener('pointerdown',e=>{on=true;moved=0;sx=e.clientX-dx;sy=e.clientY-dy;el.setPointerCapture(e.pointerId);el.style.zIndex=++z});
- el.addEventListener('pointermove',e=>{
-  if(!on||touch)return;const nx=e.clientX-sx,ny=e.clientY-sy;
-  moved+=Math.abs(nx-dx)+Math.abs(ny-dy);dx=nx;dy=ny;
-  if(moved>4)el.classList.add('drag');
-  el.style.setProperty('--dx',dx+'px');el.style.setProperty('--dy',dy+'px');
- });
- const end=()=>{if(!on)return;on=false;
-  if(moved<=4){onTap&&onTap();el.classList.add('play');setTimeout(()=>el.classList.remove('play'),1200)} /* 手機點一下播放動畫 */
-  el.classList.remove('drag')};
- el.addEventListener('pointerup',end);el.addEventListener('pointercancel',()=>{on=false;el.classList.remove('drag')});
-}
+function makeTappable(el,onTap){el.addEventListener('click',()=>{onTap&&onTap();el.classList.add('play');setTimeout(()=>el.classList.remove('play'),1200)})}
 
 const playOn=!document.getElementById('play').hidden;document.getElementById('nav-play').hidden=!playOn;
+const COARSE=matchMedia('(pointer:coarse)').matches;
 OBJECTS.forEach(o=>{if(o.link&&document.getElementById(o.link).hidden)delete o.link});
 OBJECTS.forEach((o,i)=>{
  const el=document.createElement('div'),a=ANIMS[o.anim]||ANIMS.wiggle;
  el.className='obj';el.dataset.anim=o.anim;
- Object.assign(el.style,{left:o.x+'%',top:o.y+'%',width:`max(calc(${o.w}vw * var(--k,1)),var(--minw,64px))`,zIndex:z++});
+ el.style.zIndex=z++;el.style.setProperty('--pl',o.x+'%');el.style.setProperty('--pt',o.y+'%');el.style.setProperty('--pw',`max(calc(${o.w}vw * var(--k,1)),var(--minw,64px))`);
+ if(o.m){el.style.setProperty('--ml',o.m.x+'%');el.style.setProperty('--mt',o.m.y+'%');el.style.setProperty('--mw',o.m.w+'vw')}else el.classList.add('no-m');
  el.style.setProperty('--r',(o.r||0)+'deg');
  el.style.setProperty('--anim',a[0]);el.style.setProperty('--origin',a[1]||'50% 50%');
  const im=new Image();im.src=o.src||placeholder(o);im.alt=o.name;im.draggable=false;
@@ -497,7 +506,10 @@ OBJECTS.forEach((o,i)=>{
  if(o.link){const t=document.createElement('span');t.className='tag';t.textContent=o.tag||'Open';el.appendChild(t);el.classList.add('link')}
  stage.appendChild(el);setTimeout(()=>el.classList.add('in'),150+i*120);
  
- makeDraggable(el,()=>{play(o);if(o.link)document.getElementById(o.link).scrollIntoView({block:'start'})});
+ makeTappable(el,()=>{play(o);if(!o.link)return;const go=()=>document.getElementById(o.link).scrollIntoView({block:'start'});
+  if(!COARSE){go();return}
+  if(el.classList.contains('armed')){clearTimeout(el._t);el.classList.remove('armed');go()}
+  else{document.querySelectorAll('.obj.armed').forEach(x=>x.classList.remove('armed'));el.classList.add('armed');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('armed'),2500)}});
  el.addEventListener('pointerenter',e=>{if(e.pointerType!=='touch')play(o)});
 });
 
@@ -562,16 +574,12 @@ document.querySelectorAll('.cmp').forEach(c=>{const mk=n=>{const i=new Image();i
  c.querySelector('input').addEventListener('input',e=>c.style.setProperty('--p',e.target.value+'%'))});
 
 
-/* ============ 語言切換（預設依瀏覽器語言，選過會記住）與複製 Email ============ */
+/* ============ 語言切換（預設依瀏覽器語言，選過會記住） ============ */
 function setLang(l,save){const d=document.documentElement;d.dataset.lang=l;d.lang=l==='zh'?'zh-Hant':'en';
  document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
  if(save){try{localStorage.setItem('lang',l)}catch(e){}}}
 document.querySelectorAll('#lang button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.l,true)));
 setLang(document.documentElement.dataset.lang,false);
-const cpBtn=document.getElementById('copyMail');
-cpBtn.addEventListener('click',async()=>{const m='ppqq98741@gmail.com';
- try{await navigator.clipboard.writeText(m)}catch(e){const t=document.createElement('textarea');t.value=m;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
- cpBtn.classList.add('copied');setTimeout(()=>cpBtn.classList.remove('copied'),1600)});
 
 /* 自我介紹區的內容捲到時依序淡入 */
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')}),{threshold:.2});
